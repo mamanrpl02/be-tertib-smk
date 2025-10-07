@@ -23,4 +23,9 @@ class Siswa extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function siswaKelas()
+    {
+        return $this->hasMany(SiswaKelas::class, 'siswa_id');
+    }
 }

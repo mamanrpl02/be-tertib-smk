@@ -13,7 +13,6 @@ return new class extends Migration
             $table->string('nama');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('nisn')->nullable(); // opsional
             $table->string('kelas')->nullable();
             $table->string('jurusan')->nullable();
             $table->timestamps();
