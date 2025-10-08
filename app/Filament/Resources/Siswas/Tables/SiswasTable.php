@@ -17,6 +17,7 @@ class SiswasTable
             ->columns([
                 ImageColumn::make('foto_profile')
                     ->label('Foto')
+                    ->disk('public') // <- ini penting
                     ->circular(),
 
                 TextColumn::make('nama')

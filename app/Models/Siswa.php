@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use delete;
+use Illuminate\Support\Facades\Storage;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Laravel\Sanctum\HasApiTokens;
 
 class Siswa extends Authenticatable
 {
@@ -36,5 +38,28 @@ class Siswa extends Authenticatable
     public function kelasTiga()
     {
         return $this->belongsTo(KelasSiswa::class, 'tingkat_12');
+    }
+    public function kelas()
+    {
+        return $this->belongsTo(\App\Models\KelasSiswa::class, 'kelas_id');
+    }
+
+    // Di model Siswa.php
+    protected static function booted()
+    {
+        static::updating(function ($siswa) {
+            if ($siswa->isDirty('foto_profile')) {
+                $old = $siswa->getOriginal('foto_profile');
+                if ($old && Storage::disk('public')->exists($old)) {
+                    Storage::disk('public')->delete($old);
+                }
+            }
+        });
+
+        static::deleting(function ($siswa) {
+            if ($siswa->foto_profile && Storage::disk('public')->exists($siswa->foto_profile)) {
+                Storage::disk('public')->delete($siswa->foto_profile);
+            }
+        });
     }
 }

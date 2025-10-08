@@ -1,11 +1,14 @@
 <?php
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Hash;
 use App\Models\Siswa;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\SiswaController;
+use Illuminate\Support\Facades\Storage;
 
-// ✅ Login siswa
+
+// ✅ LOGIN SISWA
 Route::post('/login-siswa', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
@@ -28,12 +31,43 @@ Route::post('/login-siswa', function (Request $request) {
     ]);
 });
 
-// ✅ Data siswa login
+
 Route::middleware('auth:sanctum')->get('/siswa', function (Request $request) {
-    return response()->json($request->user());
+    $siswa = $request->user();
+
+    // Ambil data kelas
+    $kelasId = $siswa->tingkat_12 ?? $siswa->tingkat_11 ?? $siswa->tingkat_10;
+    $kelas = null;
+    if ($kelasId) {
+        $kelas = \App\Models\KelasSiswa::with(['jurusan', 'waliKelas'])->find($kelasId);
+    }
+
+    // ✅ Bikin URL foto yang bisa dibuka
+    $fotoUrl = null;
+    if ($siswa->foto_profile) {
+        try {
+            // coba generate temporary URL 1 hari
+            $fotoUrl = Storage::disk('public')->temporaryUrl($siswa->foto_profile, now()->addDay());
+        } catch (\Exception $e) {
+            // fallback ke asset biasa kalau gagal
+            $fotoUrl = asset('storage/' . $siswa->foto_profile);
+        }
+    }
+
+    return response()->json([
+        'id' => $siswa->id,
+        'nama' => $siswa->nama,
+        'email' => $siswa->email,
+        'jenis_kelamin' => $siswa->jenis_kelamin ?? '-',
+        'foto' => $fotoUrl, // ✅ gunakan URL valid
+        'kelas' => $kelas->tingkat ?? '-',
+        'jurusan' => $kelas->jurusan->nama ?? '-',
+        'wali_kelas' => $kelas->waliKelas->name ?? '-',
+    ]);
 });
 
-// ✅ Logout siswa
+
+// ✅ LOGOUT SISWA
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
     return response()->json(['message' => 'Logout berhasil']);

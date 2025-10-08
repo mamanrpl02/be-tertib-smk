@@ -44,7 +44,7 @@ class KelasSiswa extends Model
     {
         return "{$this->tingkat} - {$this->jurusan->nama}";
     }
- 
+
 
     public function waliKelas()
     {
