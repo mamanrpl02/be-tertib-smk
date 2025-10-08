@@ -11,12 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('kelas', function (Blueprint $table) {
+        Schema::create('kelas_siswas', function (Blueprint $table) {
             $table->id();
-            $table->integer('tingkat'); // 10, 11, 12
-            $table->string('jurusan'); // RPL, TKR, dll
-            $table->string('sub_kelas'); // A, B, C, D
-            $table->foreignId('wali_kelas_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->enum('tingkat', ['10', '11', '12']);
+            $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
+            $table->string('wali_kelas')->nullable();
+            $table->year('s_ganjil')->nullable();
+            $table->year('s_genap')->nullable();
             $table->timestamps();
         });
     }
@@ -26,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('kelas');
+        Schema::dropIfExists('kelas_siswas');
     }
 };

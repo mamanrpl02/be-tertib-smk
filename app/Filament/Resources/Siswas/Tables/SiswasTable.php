@@ -2,11 +2,12 @@
 
 namespace App\Filament\Resources\Siswas\Tables;
 
+use Filament\Tables\Table;
+use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
 
 class SiswasTable
 {
@@ -14,27 +15,42 @@ class SiswasTable
     {
         return $table
             ->columns([
+                ImageColumn::make('foto_profile')
+                    ->label('Foto')
+                    ->circular(),
+
                 TextColumn::make('nama')
+                    ->label('Nama')
+                    ->sortable()
                     ->searchable(),
+
                 TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(), 
-                TextColumn::make('kelas')
-                    ->searchable(),
-                TextColumn::make('jurusan')
-                    ->searchable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Email')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
+                    ->searchable(),
+
+                TextColumn::make('jenis_kelamin')
+                    ->label('Jenis Kelamin'),
+
+                TextColumn::make('kelasSatu.nama_kelas')
+                    ->label('Kelas 10')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->searchable(),
+
+                TextColumn::make('kelasDua.nama_kelas')
+                    ->label('Kelas 11')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('kelasTiga.nama_kelas')
+                    ->label('Kelas 12')
+                    ->sortable()
+                    ->searchable(),
+
+
+
             ])
-            ->filters([
-                //
-            ])
+            ->filters([])
             ->recordActions([
                 EditAction::make(),
             ])

@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // penting!
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Laravel\Sanctum\HasApiTokens;
 
 class Siswa extends Authenticatable
@@ -14,18 +14,27 @@ class Siswa extends Authenticatable
         'nama',
         'email',
         'password',
-        'nisn',
-        'kelas',
-        'jurusan',
+        'jenis_kelamin',
+        'foto_profile',
+        'tingkat_10',
+        'tingkat_11',
+        'tingkat_12',
     ];
 
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    public function siswaKelas()
+    public function kelasSatu()
     {
-        return $this->hasMany(SiswaKelas::class, 'siswa_id');
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_10');
+    }
+
+    public function kelasDua()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_11');
+    }
+
+    public function kelasTiga()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_12');
     }
 }

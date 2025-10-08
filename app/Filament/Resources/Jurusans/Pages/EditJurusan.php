@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Kelas\Pages;
+namespace App\Filament\Resources\Jurusans\Pages;
 
-use App\Filament\Resources\Kelas\KelasResource;
+use App\Filament\Resources\Jurusans\JurusanResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditKelas extends EditRecord
+class EditJurusan extends EditRecord
 {
-    protected static string $resource = KelasResource::class;
+    protected static string $resource = JurusanResource::class;
 
     protected function getHeaderActions(): array
     {

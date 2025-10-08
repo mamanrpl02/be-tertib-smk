@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Filament\Resources\Kelas\Tables;
+namespace App\Filament\Resources\KelasSiswas\Tables;
 
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -8,22 +8,26 @@ use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
-class KelasTable
+class KelasSiswasTable
 {
     public static function configure(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('tingkat')
+                TextColumn::make('tingkat'),
+                TextColumn::make('jurusan.nama')
                     ->numeric()
                     ->sortable(),
-                TextColumn::make('jurusan')
-                    ->searchable(),
-                TextColumn::make('sub_kelas')
-                    ->searchable(),
                 TextColumn::make('waliKelas.name')
-                    ->numeric()
+                    ->label('Wali Kelas')
+                    ->searchable()
                     ->sortable(),
+
+                TextColumn::make('s_ganjil')
+                    ->searchable(),
+                TextColumn::make('s_genap')
+                    ->searchable(),
+                    
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()

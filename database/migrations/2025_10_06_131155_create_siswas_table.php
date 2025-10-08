@@ -13,8 +13,11 @@ return new class extends Migration
             $table->string('nama');
             $table->string('email')->unique();
             $table->string('password');
-            $table->string('kelas')->nullable();
-            $table->string('jurusan')->nullable();
+            $table->enum('jenis_kelamin', ['Laki-laki', 'Perempuan'])->nullable();
+            $table->string('foto_profile')->nullable();
+            $table->foreignId('tingkat_10')->nullable()->constrained('kelas_siswas')->nullOnDelete();
+            $table->foreignId('tingkat_11')->nullable()->constrained('kelas_siswas')->nullOnDelete();
+            $table->foreignId('tingkat_12')->nullable()->constrained('kelas_siswas')->nullOnDelete();
             $table->timestamps();
         });
     }
