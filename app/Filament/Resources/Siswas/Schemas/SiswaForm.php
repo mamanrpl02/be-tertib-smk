@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Siswas\Schemas;
 
+use Illuminate\Support\Facades\Storage;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Hash;
 use Filament\Forms\Components\Select;
@@ -36,12 +37,21 @@ class SiswaForm
                     ->required(),
                 FileUpload::make('foto_profile')
                     ->label('Foto Profil')
-                    ->directory('foto_siswa') // folder di storage/app/public/foto_siswa
+                    ->disk('public')
+                    ->directory('foto_siswa')
                     ->image()
                     ->maxSize(2048)
                     ->imageEditor()
                     ->imagePreviewHeight('150')
-                    ->downloadable(),
+                    ->downloadable()
+                    ->deleteUploadedFileUsing(function ($file) {
+                        if ($file && Storage::disk('public')->exists($file)) {
+                            Storage::disk('public')->delete($file);
+                        }
+                    })
+                    ->preserveFilenames(false) // biar nama file unik dan tidak bentrok
+                    ->reorderable(false)
+                    ->moveFiles(), // otomatis pindahkan kalau direplace
 
                 TextInput::make('password')
                     ->password()
