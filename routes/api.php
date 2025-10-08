@@ -3,58 +3,38 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use App\Models\Siswa;
 
-// ✅ Register
-Route::post('/register', function (Request $request) {
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|email|unique:users,email',
-        'password' => 'required|min:6',
-    ]);
-
-    $user = User::create([
-        'name' => $request->name,
-        'email' => $request->email,
-        'password' => Hash::make($request->password),
-    ]);
-
-    return response()->json([
-        'message' => 'Registered successfully',
-        'user' => $user,
-    ], 201);
-});
-
-// ✅ Login
-Route::post('/login', function (Request $request) {
+// ✅ Login siswa
+Route::post('/login-siswa', function (Request $request) {
     $request->validate([
         'email' => 'required|email',
         'password' => 'required',
     ]);
 
-    $user = User::where('email', $request->email)->first();
+    $siswa = Siswa::where('email', $request->email)->first();
 
-    if (!$user || !Hash::check($request->password, $user->password)) {
-        return response()->json(['message' => 'Invalid credentials'], 401);
+    if (!$siswa || !Hash::check($request->password, $siswa->password)) {
+        return response()->json(['message' => 'Email atau password salah'], 401);
     }
 
-    $token = $user->createToken('auth_token')->plainTextToken;
+    $token = $siswa->createToken('auth_token')->plainTextToken;
 
     return response()->json([
-        'message' => 'Login successful',
+        'message' => 'Login berhasil',
         'access_token' => $token,
         'token_type' => 'Bearer',
-        'user' => $user,
+        'siswa' => $siswa,
     ]);
 });
 
-// ✅ Get user info
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+// ✅ Data siswa login
+Route::middleware('auth:sanctum')->get('/siswa', function (Request $request) {
     return response()->json($request->user());
 });
 
-// ✅ Logout
+// ✅ Logout siswa
 Route::middleware('auth:sanctum')->post('/logout', function (Request $request) {
     $request->user()->currentAccessToken()->delete();
-    return response()->json(['message' => 'Logged out successfully']);
+    return response()->json(['message' => 'Logout berhasil']);
 });

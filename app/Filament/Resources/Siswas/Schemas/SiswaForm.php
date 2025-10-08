@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Filament\Resources\Siswas\Schemas;
+
+use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Hash;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\PasswordInput;
+
+class SiswaForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('nama')
+                    ->label('Nama Lengkap')
+                    ->required()
+                    ->maxLength(255),
+
+                TextInput::make('email')
+                    ->label('Email')
+                    ->email()
+                    ->unique(ignoreRecord: true)
+                    ->required(),
+
+                Select::make('jenis_kelamin')
+                    ->options([
+                        'Laki-laki' => 'Laki-laki',
+                        'Perempuan' => 'Perempuan',
+                    ])
+                    ->label('Jenis Kelamin')
+                    ->required(),
+                FileUpload::make('foto_profile')
+                    ->label('Foto Profil')
+                    ->directory('foto_siswa') // folder di storage/app/public/foto_siswa
+                    ->image()
+                    ->maxSize(2048)
+                    ->imageEditor()
+                    ->imagePreviewHeight('150')
+                    ->downloadable(),
+
+                TextInput::make('password')
+                    ->password()
+                    ->revealable()
+                    ->minLength(8)
+                    ->label('Password')
+                    ->helperText('Kosongkan jika tidak ingin mengubah password.')
+                    ->required(fn(string $context): bool => $context === 'create')
+                    ->dehydrateStateUsing(fn($state) => filled($state) ? Hash::make($state) : null)
+                    ->dehydrated(fn($state) => filled($state)), // hanya kirim kalau diisi
+
+
+
+                Select::make('tingkat_10')
+                    ->label('Kelas Tingkat 10')
+                    ->options(
+                        \App\Models\KelasSiswa::all()
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+
+                Select::make('tingkat_11')
+                    ->label('Kelas Tingkat 11')
+                    ->options(
+                        \App\Models\KelasSiswa::all()
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+
+                Select::make('tingkat_12')
+                    ->label('Kelas Tingkat 12')
+                    ->options(
+                        \App\Models\KelasSiswa::all()
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->nullable(),
+
+
+
+
+
+            ]);
+    }
+}
