@@ -42,7 +42,7 @@ class KelasSiswa extends Model
     // Nama kelas gabungan
     public function getNamaKelasAttribute(): string
     {
-        return "{$this->tingkat} - {$this->jurusan->nama}";
+        return "{$this->tingkat} - {$this->jurusan->nama_jurusan}";
     }
 
 

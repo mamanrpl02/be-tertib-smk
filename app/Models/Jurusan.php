@@ -9,7 +9,7 @@ class Jurusan extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['nama', 'desk'];
+    protected $fillable = ['nama_jurusan', 'sub_kelas'];
 
     public function kelasSiswas()
     {

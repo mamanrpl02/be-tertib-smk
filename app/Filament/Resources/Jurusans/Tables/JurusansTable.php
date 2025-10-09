@@ -14,7 +14,9 @@ class JurusansTable
     {
         return $table
             ->columns([
-                TextColumn::make('nama')
+                TextColumn::make('nama_jurusan')
+                    ->searchable(),
+                TextColumn::make('sub_kelas')
                     ->searchable(),
                 TextColumn::make('created_at')
                     ->dateTime()

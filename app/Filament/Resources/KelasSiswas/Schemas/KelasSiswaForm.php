@@ -19,10 +19,15 @@ class KelasSiswaForm
                     ->required(),
                 Select::make('jurusan_id')
                     ->label('Jurusan')
-                    ->relationship('jurusan', 'nama') // relasi ke model Jurusan
+                    ->options(
+                        \App\Models\Jurusan::all()->mapWithKeys(function ($jurusan) {
+                            return [$jurusan->id => $jurusan->nama_jurusan . ' - ' . $jurusan->sub_kelas];
+                        })->toArray()
+                    )
                     ->searchable()
                     ->preload()
                     ->required(),
+
 
                 Select::make('wali_kelas')
                     ->label('Wali Kelas')

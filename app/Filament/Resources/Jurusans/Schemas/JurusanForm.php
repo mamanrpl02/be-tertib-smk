@@ -5,6 +5,9 @@ namespace App\Filament\Resources\Jurusans\Schemas;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Select;
+
+
 
 class JurusanForm
 {
@@ -12,10 +15,17 @@ class JurusanForm
     {
         return $schema
             ->components([
-                TextInput::make('nama')
+                TextInput::make('nama_jurusan')
+                    ->label('Nama Jurusan')
                     ->required(),
-                Textarea::make('desk')
-                    ->columnSpanFull(),
+                Select::make('sub_kelas')
+                    ->label('Sub Kelas')
+                    ->options([
+                        'A' => 'A',
+                        'B' => 'B',
+                        'C' => 'C',
+                        'D' => 'D',
+                    ]),
             ]);
     }
 }

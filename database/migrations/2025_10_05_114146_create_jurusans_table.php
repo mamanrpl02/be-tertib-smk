@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('jurusans', function (Blueprint $table) {
             $table->id();
-            $table->string('nama');
-            $table->text('desk')->nullable();
+            $table->string('nama_jurusan');
+            $table->enum('sub_kelas', ['A', 'B', 'C', 'D'])->nullable();
             $table->timestamps();
         });
     }

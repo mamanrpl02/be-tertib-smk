@@ -69,7 +69,7 @@ class SiswaForm
                     ->label('Kelas Tingkat 10')
                     ->options(
                         \App\Models\KelasSiswa::all()
-                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan}"])
                     )
                     ->searchable()
                     ->preload()
@@ -79,7 +79,7 @@ class SiswaForm
                     ->label('Kelas Tingkat 11')
                     ->options(
                         \App\Models\KelasSiswa::all()
-                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan}"])
                     )
                     ->searchable()
                     ->preload()
@@ -89,7 +89,7 @@ class SiswaForm
                     ->label('Kelas Tingkat 12')
                     ->options(
                         \App\Models\KelasSiswa::all()
-                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama}"])
+                            ->mapWithKeys(fn($kelas) => [$kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan}"])
                     )
                     ->searchable()
                     ->preload()
