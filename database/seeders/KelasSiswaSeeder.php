@@ -13,12 +13,24 @@ class KelasSiswaSeeder extends Seeder
      */
     public function run(): void
     {
-        KelasSiswa::create([
-            'tingkat' => '10',
-            'jurusan_id' => 1,
-            'wali_kelas' => 1,
-            's_ganjil' => 2025,
-            's_genap' => 2026,
-        ]);
+
+        $dataKelasSiswa = [
+            ['tingkat' => '10', 'jurusan_id' => 1, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+            ['tingkat' => '11', 'jurusan_id' => 1, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+            ['tingkat' => '12', 'jurusan_id' => 1, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+            ['tingkat' => '10', 'jurusan_id' => 2, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+            ['tingkat' => '11', 'jurusan_id' => 2, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+            ['tingkat' => '12', 'jurusan_id' => 2, 'wali_kelas' => 1, 's_ganjil' => 2024, 's_genap' => 2025],
+        ];
+
+        foreach ($dataKelasSiswa as $data) {
+            KelasSiswa::create([
+                'tingkat' => $data['tingkat'],
+                'jurusan_id' => $data['jurusan_id'],
+                'wali_kelas' => $data['wali_kelas'],
+                's_ganjil' => $data['s_ganjil'],
+                's_genap' => $data['s_genap'],
+            ]);
+        }
     }
 }

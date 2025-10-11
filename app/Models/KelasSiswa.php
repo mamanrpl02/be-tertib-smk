@@ -17,37 +17,28 @@ class KelasSiswa extends Model
         's_genap',
     ];
 
-    // Relasi ke jurusan
+    // 🔗 Relasi ke jurusan
     public function jurusan()
     {
         return $this->belongsTo(Jurusan::class);
     }
 
-    // Relasi ke siswa di tiap tingkat
-    public function siswas10()
+    // 🔗 Relasi ke siswa
+    public function siswa()
     {
-        return $this->hasMany(Siswa::class, 'tingkat_10');
+        return $this->hasMany(Siswa::class, 'kelas_siswa_id');
     }
 
-    public function siswas11()
-    {
-        return $this->hasMany(Siswa::class, 'tingkat_11');
-    }
-
-    public function siswas12()
-    {
-        return $this->hasMany(Siswa::class, 'tingkat_12');
-    }
-
-    // Nama kelas gabungan
-    public function getNamaKelasAttribute(): string
-    {
-        return "{$this->tingkat} - {$this->jurusan->nama_jurusan}";
-    }
-
-
+    // 🔗 Relasi wali kelas (User)
     public function waliKelas()
     {
-        return $this->belongsTo(\App\Models\User::class, 'wali_kelas');
+        return $this->belongsTo(User::class, 'wali_kelas');
+    }
+
+    // 🧩 Accessor nama kelas
+    public function getNamaKelasAttribute(): string
+    {
+        $jurusanNama = $this->jurusan ? $this->jurusan->nama_jurusan : 'Tanpa Jurusan';
+        return "{$this->tingkat} - {$jurusanNama}";
     }
 }

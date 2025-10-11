@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->enum('tingkat', ['10', '11', '12']);
             $table->foreignId('jurusan_id')->constrained('jurusans')->onDelete('cascade');
-            $table->string('wali_kelas')->nullable();
+            $table->foreignId('wali_kelas')->nullable()->constrained('users')->nullOnDelete();
             $table->year('s_ganjil')->nullable();
             $table->year('s_genap')->nullable();
             $table->timestamps();

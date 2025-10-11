@@ -17,37 +17,34 @@ class ApresiasisTable
         return $table
             ->columns([
                 TextColumn::make('nama')->label('Judul')->searchable()->sortable(),
-          TextColumn::make('siswa_ids')
-    ->label('Siswa')
-    ->formatStateUsing(function ($state) {
-        // Pastikan selalu dalam bentuk array
-        if (is_null($state)) {
-            $ids = [];
-        } elseif (is_string($state)) {
-            $decoded = json_decode($state, true);
-            $ids = is_array($decoded) ? $decoded : [$state];
-        } elseif (is_int($state)) {
-            $ids = [$state];
-        } elseif (is_array($state)) {
-            $ids = $state;
-        } else {
-            $ids = [];
-        }
+                TextColumn::make('siswa_ids')
+                    ->label('Siswa')
+                    ->formatStateUsing(function ($state) {
+                        // Pastikan selalu dalam bentuk array
+                        if (is_null($state)) {
+                            $ids = [];
+                        } elseif (is_string($state)) {
+                            $decoded = json_decode($state, true);
+                            $ids = is_array($decoded) ? $decoded : [$state];
+                        } elseif (is_int($state)) {
+                            $ids = [$state];
+                        } elseif (is_array($state)) {
+                            $ids = $state;
+                        } else {
+                            $ids = [];
+                        }
 
-        // Kalau kosong, tampilkan tanda '-'
-        if (empty($ids)) {
-            return '-';
-        }
+                        // Kalau kosong, tampilkan tanda '-'
+                        if (empty($ids)) {
+                            return '-';
+                        }
 
-        // Ambil nama siswa berdasarkan ID
-        return \App\Models\Siswa::whereIn('id', $ids)
-            ->pluck('nama')
-            ->join(', ');
-    })
-    ->wrap(),
-
-
-
+                        // Ambil nama siswa berdasarkan ID
+                        return \App\Models\Siswa::whereIn('id', $ids)
+                            ->pluck('nama')
+                            ->join(', ');
+                    })
+                    ->wrap(),
 
                 BadgeColumn::make('poin')
                     ->label('Poin')

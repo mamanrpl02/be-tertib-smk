@@ -14,15 +14,17 @@ return new class extends Migration
         Schema::create('apresiasis', function (Blueprint $table) {
             $table->id();
             $table->string('nama');
-            // $table->foreignId('siswa_id')->constrained('siswas')->onDelete('cascade');
-            $table->json('siswa_ids');
             $table->integer('poin');
-            $table->foreignId('created_by')->constrained('users')->onDelete('cascade');
-            $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');
-            $table->boolean('fl_beranda')->default(false);
             $table->text('deskripsi');
             $table->string('bukti_laporan')->nullable();
-            $table->timestamps(); // created_at & updated_at
+            $table->boolean('fl_beranda')->default(false);
+            $table->enum('tipe_apresiasi', ['spesifik', 'tingkat', 'tingkat_jurusan'])->nullable();
+            $table->enum('tingkat', ['10', '11', '12'])->nullable();
+            $table->foreignId('kelas_siswa_id')->nullable()->constrained('kelas_siswas')->nullOnDelete();
+            $table->json('siswa_ids')->nullable();
+            $table->foreignId('created_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->foreignId('updated_by')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
         });
     }
 

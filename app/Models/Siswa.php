@@ -25,6 +25,20 @@ class Siswa extends Authenticatable
 
     protected $hidden = ['password', 'remember_token'];
 
+    public function apresiasis()
+    {
+        return $this->belongsToMany(Apresiasi::class, 'apresiasi_siswa');
+    }
+
+
+    public function kelasSiswa()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'kelas_siswa_id');
+    }
+
+
+
+
     public function kelasSatu()
     {
         return $this->belongsTo(KelasSiswa::class, 'tingkat_10');
@@ -42,6 +56,23 @@ class Siswa extends Authenticatable
     public function kelas()
     {
         return $this->belongsTo(\App\Models\KelasSiswa::class, 'kelas_id');
+    }
+
+
+    // app/Models/Siswa.php
+    public function kelasTingkat10()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_10');
+    }
+
+    public function kelasTingkat11()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_11');
+    }
+
+    public function kelasTingkat12()
+    {
+        return $this->belongsTo(KelasSiswa::class, 'tingkat_12');
     }
 
     // Di model Siswa.php

@@ -33,6 +33,6 @@ class DatabaseSeeder extends Seeder
             KelasSiswaSeeder::class,
         ]);
         $this->call(SiswaSeeder::class);
-        $this->call(ApresiasiSeeder::class);
+        // $this->call(ApresiasiSeeder::class);
     }
 }

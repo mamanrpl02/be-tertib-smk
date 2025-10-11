@@ -18,6 +18,7 @@ return new class extends Migration
             $table->foreignId('tingkat_10')->nullable()->constrained('kelas_siswas')->nullOnDelete();
             $table->foreignId('tingkat_11')->nullable()->constrained('kelas_siswas')->nullOnDelete();
             $table->foreignId('tingkat_12')->nullable()->constrained('kelas_siswas')->nullOnDelete();
+            // $table->foreignId('kelas_siswa_id')->nullable()->constrained('kelas_siswas')->nullOnDelete();
             $table->timestamps();
         });
     }
