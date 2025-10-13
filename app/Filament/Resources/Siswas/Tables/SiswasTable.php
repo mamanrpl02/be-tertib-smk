@@ -33,18 +33,36 @@ class SiswasTable
                 TextColumn::make('jenis_kelamin')
                     ->label('Jenis Kelamin'),
 
-                TextColumn::make('kelasSatu.nama_kelas')
+                TextColumn::make('kelasTingkat10.jurusan.nama_jurusan')
                     ->label('Kelas 10')
+                    ->formatStateUsing(
+                        fn($record) =>
+                        optional($record->kelasTingkat10?->jurusan)
+                            ? "{$record->kelasTingkat10->tingkat} - {$record->kelasTingkat10->jurusan->nama_jurusan} {$record->kelasTingkat10->jurusan->sub_kelas}"
+                            : '-'
+                    )
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('kelasDua.nama_kelas')
+                TextColumn::make('kelasTingkat11.jurusan.nama_jurusan')
                     ->label('Kelas 11')
+                    ->formatStateUsing(
+                        fn($record) =>
+                        optional($record->kelasTingkat11?->jurusan)
+                            ? "{$record->kelasTingkat11->tingkat} - {$record->kelasTingkat11->jurusan->nama_jurusan} {$record->kelasTingkat11->jurusan->sub_kelas}"
+                            : '-'
+                    )
                     ->sortable()
                     ->searchable(),
 
-                TextColumn::make('kelasTiga.nama_kelas')
+                TextColumn::make('kelasTingkat12.jurusan.nama_jurusan')
                     ->label('Kelas 12')
+                    ->formatStateUsing(
+                        fn($record) =>
+                        optional($record->kelasTingkat12?->jurusan)
+                            ? "{$record->kelasTingkat12->tingkat} - {$record->kelasTingkat12->jurusan->nama_jurusan} {$record->kelasTingkat12->jurusan->sub_kelas}"
+                            : '-'
+                    )
                     ->sortable()
                     ->searchable(),
 

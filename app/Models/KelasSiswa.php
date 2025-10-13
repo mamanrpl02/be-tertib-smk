@@ -17,7 +17,10 @@ class KelasSiswa extends Model
         's_genap',
     ];
 
+
+
     // 🔗 Relasi ke jurusan
+
     public function jurusan()
     {
         return $this->belongsTo(Jurusan::class);
