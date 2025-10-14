@@ -46,10 +46,36 @@ class ApresiasiForm
                 Select::make('siswa')
                     ->label('Pilih Siswa Spesifik')
                     ->multiple()
-                    ->options(Siswa::pluck('nama', 'id'))
+                    ->options(function ($get, $record) {
+                        // Ambil semua siswa
+                        $allSiswa = \App\Models\Siswa::pluck('nama', 'id');
+
+                        // Ambil siswa yang sudah terpilih dari record (jika ada)
+                        $selectedIds = $record
+                            ? $record->siswa()->pluck('siswas.id')->toArray()
+                            : [];
+
+                        // Filter siswa agar tidak muncul 2x di daftar (kecuali yang sudah terpilih)
+                        $filtered = \App\Models\Siswa::whereNotIn('id', $selectedIds)
+                            ->pluck('nama', 'id');
+
+                        // Gabungkan siswa yang sudah terpilih agar tetap bisa tampil label-nya saat edit
+                        return $filtered->union($allSiswa->only($selectedIds));
+                    })
+                    ->afterStateHydrated(function ($state, $set, $record) {
+                        if (!$record) return;
+
+                        // Ambil siswa yang sudah terkait di pivot
+                        $selectedIds = $record->siswa()->pluck('siswas.id')->toArray();
+
+                        // Set nilai select ke ID-ID tersebut
+                        $set('siswa', $selectedIds);
+                    })
                     ->searchable()
                     ->preload()
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'spesifik'),
+
+
 
                 // --- Berdasarkan Tingkat ---
                 Select::make('tingkat')
@@ -95,8 +121,6 @@ class ApresiasiForm
                     ->searchable()
                     ->preload(),
 
-
-
                 // --- Berdasarkan Tingkat & Jurusan ---
                 Select::make('kelas_siswa_id')
                     ->label('Pilih Tingkat & Jurusan')
@@ -104,17 +128,17 @@ class ApresiasiForm
                         $tingkat = $get('tingkat');
                         if (!$tingkat) return [];
 
-                        $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($tingkat) {
-                            if ($siswa->tingkat_12) $aktif = '12';
-                            elseif ($siswa->tingkat_11) $aktif = '11';
-                            elseif ($siswa->tingkat_10) $aktif = '10';
+                        $semuaKelas = KelasSiswa::all()->filter(function ($kelas) use ($tingkat) {
+                            if ($kelas->tingkat_12) $aktif = '12';
+                            elseif ($kelas->tingkat_11) $aktif = '11';
+                            elseif ($kelas->tingkat_10) $aktif = '10';
                             else $aktif = null;
 
                             return $aktif === $tingkat;
                         });
 
                         // Tampilkan semua siswa di tingkat, termasuk yang sudah dipilih
-                        return $semuaSiswa->pluck('nama', 'id')->toArray();
+                        return $semuaKelas->pluck('nama', 'id')->toArray();
                     })
 
                     ->reactive()
