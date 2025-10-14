@@ -11,27 +11,25 @@ class Apresiasi extends Model
 
     protected $fillable = [
         'nama',
-        'siswa_ids',
-        'tipe_apresiasi',
         'poin',
-        'created_by',
-        'updated_by',
-        'fl_beranda',
+        'tipe_apresiasi',
         'deskripsi',
         'bukti_laporan',
+        'fl_beranda',
         'tingkat',
         'kelas_siswa_id',
+        'created_by',
+        'updated_by',
     ];
 
     protected $casts = [
-        'siswa_ids' => 'array',
         'fl_beranda' => 'boolean',
     ];
 
     // 🔗 RELASI
     public function siswa()
     {
-        return $this->belongsToMany(Siswa::class, 'apresiasi_siswa', 'apresiasi_id', 'siswa_id');
+        return $this->belongsToMany(Siswa::class, 'apresiasi_siswa');
     }
 
     public function kelasSiswa()
@@ -39,17 +37,7 @@ class Apresiasi extends Model
         return $this->belongsTo(KelasSiswa::class);
     }
 
-    public function creator()
-    {
-        return $this->belongsTo(User::class, 'created_by');
-    }
-
-    public function updater()
-    {
-        return $this->belongsTo(User::class, 'updated_by');
-    }
-
-    // 🧠 Event otomatis saat create / update
+    // 🧠 Event otomatis
     protected static function boot()
     {
         parent::boot();
@@ -59,32 +47,38 @@ class Apresiasi extends Model
                 $model->created_by = auth()->id();
                 $model->updated_by = auth()->id();
             }
-
-            self::generateSiswaIds($model);
         });
 
         static::updating(function ($model) {
             if (auth()->check()) {
                 $model->updated_by = auth()->id();
             }
-
-            self::generateSiswaIds($model);
         });
     }
 
-    // 💡 Fungsi bantu untuk generate siswa_ids otomatis
-    protected static function generateSiswaIds($model)
+
+    // 🧩 Fungsi untuk isi tabel pivot otomatis
+    protected static function syncPivot($model)
     {
+        $siswaIds = [];
+
         if ($model->tipe_apresiasi === 'tingkat' && $model->tingkat) {
-            $model->siswa_ids = Siswa::whereHas('kelasSiswa', function ($q) use ($model) {
-                $q->where('tingkat', $model->tingkat);
+            $siswaIds = Siswa::where(function ($q) use ($model) {
+                $q->whereHas('kelasTingkat10', fn($q) => $q->where('tingkat', $model->tingkat))
+                    ->orWhereHas('kelasTingkat11', fn($q) => $q->where('tingkat', $model->tingkat))
+                    ->orWhereHas('kelasTingkat12', fn($q) => $q->where('tingkat', $model->tingkat));
             })->pluck('id')->toArray();
         } elseif ($model->tipe_apresiasi === 'tingkat_jurusan' && $model->kelas_siswa_id) {
-            $model->siswa_ids = Siswa::where('kelas_siswa_id', $model->kelas_siswa_id)
-                ->pluck('id')->toArray();
+            $siswaIds = Siswa::where(function ($q) use ($model) {
+                $q->where('tingkat_10', $model->kelas_siswa_id)
+                    ->orWhere('tingkat_11', $model->kelas_siswa_id)
+                    ->orWhere('tingkat_12', $model->kelas_siswa_id);
+            })->pluck('id')->toArray();
         }
 
-        // Jika tidak ada siswa yang cocok, tetap simpan array kosong
-        $model->siswa_ids = $model->siswa_ids ?? [];
+        // Sync ke tabel pivot
+        if (!empty($siswaIds)) {
+            $model->siswa()->sync($siswaIds);
+        }
     }
 }

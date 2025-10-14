@@ -33,10 +33,10 @@ class ApresiasiForm
                     ->required(),
 
                 Radio::make('tipe_apresiasi')
-                    ->label('Tambahkan Apresiasi Siswa Berdasarkan')
+                    ->label('Tambahkan Apresiasi Berdasarkan')
                     ->options([
                         'spesifik' => 'Siswa Spesifik',
-                        'tingkat' => 'Semua Tingkat',
+                        'tingkat' => 'Semua Siswa di Tingkat',
                         'tingkat_jurusan' => 'Tingkat & Jurusan',
                     ])
                     ->default('spesifik')
@@ -44,7 +44,7 @@ class ApresiasiForm
 
                 // --- Siswa Spesifik ---
                 Select::make('siswa')
-                    ->label('Pilih Siswa')
+                    ->label('Pilih Siswa Spesifik')
                     ->multiple()
                     ->options(Siswa::pluck('nama', 'id'))
                     ->searchable()
@@ -58,33 +58,38 @@ class ApresiasiForm
                     ->reactive()
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat'),
 
-                Select::make('siswa_tingkat')
-                    ->label('Pilih Siswa di Tingkat Ini')
+                // --- Berdasarkan Tingkat ---
+                Select::make('kecuali_siswa_tingkat')
+                    ->label('Kecuali Siswa di Tingkat Ini')
+                    ->helperText('Semua siswa di tingkat ini akan mendapatkan apresiasi, kecuali siswa yang dipilih.')
                     ->multiple()
-                    ->options(function ($get) {
+                    ->options(function ($get, $record) {
                         $tingkat = $get('tingkat');
-                        if (!$tingkat) {
-                            return [];
-                        }
+                        if (!$tingkat) return [];
 
-                        // Tentukan kolom foreign key berdasarkan tingkat
-                        $kolom = match ($tingkat) {
-                            '10' => 'tingkat_10',
-                            '11' => 'tingkat_11',
-                            '12' => 'tingkat_12',
-                            default => null,
-                        };
+                        // Semua siswa di tingkat tersebut
+                        $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($tingkat) {
+                            if ($siswa->tingkat_12) $aktif = '12';
+                            elseif ($siswa->tingkat_11) $aktif = '11';
+                            elseif ($siswa->tingkat_10) $aktif = '10';
+                            else $aktif = null;
 
-                        if (!$kolom) {
-                            return [];
-                        }
+                            return $aktif === $tingkat;
+                        });
 
-                        // Ambil siswa yang punya relasi kelas di kolom tersebut
-                        return \App\Models\Siswa::whereNotNull($kolom)
-                            ->whereHas('kelasTingkat' . $tingkat, function ($q) use ($tingkat) {
-                                $q->where('tingkat', $tingkat);
-                            })
-                            ->pluck('nama', 'id');
+                        // Ambil ID siswa yang sudah ada di pivot
+                        $pivotIds = $record?->siswa()->pluck('siswas.id')->toArray() ?? [];
+
+                        // Hanya tampilkan siswa yang belum dipilih
+                        return $semuaSiswa->whereNotIn('id', $pivotIds)->pluck('nama', 'id')->toArray();
+                    })
+                    ->afterStateHydrated(function ($state, $set, $record) {
+                        if (!$record || !$record->tingkat) return;
+
+                        // Siswa yang sudah dipilih sebelumnya
+                        $pivotIds = $record->siswa()->pluck('siswas.id')->toArray();
+
+                        $set('kecuali_siswa_tingkat', $pivotIds);
                     })
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat')
                     ->searchable()
@@ -95,38 +100,73 @@ class ApresiasiForm
                 // --- Berdasarkan Tingkat & Jurusan ---
                 Select::make('kelas_siswa_id')
                     ->label('Pilih Tingkat & Jurusan')
-                    ->options(
-                        KelasSiswa::with('jurusan')
-                            ->get()
-                            ->mapWithKeys(fn($kelas) => [
-                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan} {$kelas->jurusan->sub_kelas}"
-                            ])->toArray()
-                    )
+                    ->options(function ($get, $record) {
+                        $tingkat = $get('tingkat');
+                        if (!$tingkat) return [];
+
+                        $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($tingkat) {
+                            if ($siswa->tingkat_12) $aktif = '12';
+                            elseif ($siswa->tingkat_11) $aktif = '11';
+                            elseif ($siswa->tingkat_10) $aktif = '10';
+                            else $aktif = null;
+
+                            return $aktif === $tingkat;
+                        });
+
+                        // Tampilkan semua siswa di tingkat, termasuk yang sudah dipilih
+                        return $semuaSiswa->pluck('nama', 'id')->toArray();
+                    })
+
                     ->reactive()
                     ->searchable()
                     ->preload()
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat_jurusan'),
 
-
-
-                Select::make('siswa_jurusan')
-                    ->label('Pilih Siswa dari Tingkat & Jurusan Ini')
+                // --- Berdasarkan Tingkat & Jurusan ---
+                Select::make('kecuali_siswa_jurusan')
+                    ->label('Kecuali Siswa dari Tingkat & Jurusan Ini')
+                    ->helperText('Semua siswa di kelas ini akan mendapatkan apresiasi, kecuali siswa yang dipilih.')
                     ->multiple()
-                    ->options(function ($get) {
+                    ->options(function ($get, $record) {
                         $kelasId = $get('kelas_siswa_id');
                         if (!$kelasId) return [];
 
-                        // Cek di kolom mana kelas ini muncul
-                        return \App\Models\Siswa::where(function ($q) use ($kelasId) {
-                            $q->where('tingkat_10', $kelasId)
-                                ->orWhere('tingkat_11', $kelasId)
-                                ->orWhere('tingkat_12', $kelasId);
-                        })->pluck('nama', 'id');
+                        $kelas = KelasSiswa::find($kelasId);
+                        if (!$kelas) return [];
+
+                        $tingkat = $kelas->tingkat;
+
+                        $siswaAktif = Siswa::all()->filter(function ($siswa) use ($tingkat, $kelas) {
+                            if ($siswa->tingkat_12) $aktif = '12';
+                            elseif ($siswa->tingkat_11) $aktif = '11';
+                            elseif ($siswa->tingkat_10) $aktif = '10';
+                            else $aktif = null;
+
+                            return match ($tingkat) {
+                                '10' => $aktif === '10' && $siswa->tingkat_10 == $kelas->id,
+                                '11' => $aktif === '11' && $siswa->tingkat_11 == $kelas->id,
+                                '12' => $aktif === '12' && $siswa->tingkat_12 == $kelas->id,
+                                default => false,
+                            };
+                        });
+
+                        // Ambil ID siswa yang sudah ada di pivot
+                        $pivotIds = $record?->siswa()->pluck('siswas.id')->toArray() ?? [];
+
+                        // Hanya tampilkan siswa yang belum dipilih
+                        return $siswaAktif->whereNotIn('id', $pivotIds)->pluck('nama', 'id')->toArray();
+                    })
+                    ->afterStateHydrated(function ($state, $set, $record) {
+                        if (!$record || !$record->kelas_siswa_id) return;
+
+                        // Siswa yang sudah dipilih sebelumnya
+                        $pivotIds = $record->siswa()->pluck('siswas.id')->toArray();
+
+                        $set('kecuali_siswa_jurusan', $pivotIds);
                     })
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat_jurusan')
                     ->searchable()
                     ->preload(),
-
 
                 FileUpload::make('bukti_laporan')
                     ->label('Bukti Laporan')
@@ -136,7 +176,6 @@ class ApresiasiForm
                 Toggle::make('fl_beranda')
                     ->label('Tampilkan di Beranda')
                     ->default(false),
-
             ]);
     }
 }
