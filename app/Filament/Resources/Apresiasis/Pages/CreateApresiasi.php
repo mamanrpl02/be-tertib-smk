@@ -13,7 +13,7 @@ class CreateApresiasi extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Hilangkan field pivot dari form data sebelum create
+        // Hapus field pivot sebelum disimpan di tabel utama
         unset($data['siswa'], $data['kecuali_siswa_tingkat'], $data['kecuali_siswa_jurusan']);
         return $data;
     }
@@ -23,45 +23,84 @@ class CreateApresiasi extends CreateRecord
         $this->syncSiswaPivot();
     }
 
+    /**
+     * Sinkronisasi data siswa di pivot apresiasi_siswa
+     */
     protected function syncSiswaPivot(): void
     {
         $record = $this->record;
         $data = $this->form->getState();
-        $siswaIds = [];
 
+        // 🟩 CASE 1: Apresiasi untuk siswa spesifik
         if ($record->tipe_apresiasi === 'spesifik') {
-            $siswaIds = array_map('intval', $data['siswa'] ?? []);
-        } elseif ($record->tipe_apresiasi === 'tingkat' && $record->tingkat) {
-            $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($record) {
-                $aktif = $siswa->tingkat_10 ? '10' : ($siswa->tingkat_11 ? '11' : ($siswa->tingkat_12 ? '12' : null));
-                return $aktif === $record->tingkat;
-            });
+            $siswaIds = collect($data['siswa'] ?? [])
+                ->map(fn($id) => (int) $id)
+                ->toArray();
 
-            $semuaIds = $semuaSiswa->pluck('id')->map(fn($id) => (int) $id)->toArray();
-            $kecuali = array_map('intval', $data['kecuali_siswa_tingkat'] ?? []);
-            $siswaIds = array_values(array_diff($semuaIds, $kecuali));
-        } elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
+            if (!empty($siswaIds)) {
+                $record->siswa()->sync($siswaIds);
+            }
+            return;
+        }
+
+        // 🟩 CASE 2: Apresiasi berdasarkan tingkat (misalnya semua siswa kelas 10)
+        if ($record->tipe_apresiasi === 'tingkat' && $record->tingkat) {
+            $tingkat = $record->tingkat;
+
+            // Ambil siswa yang BENAR-BENAR aktif di tingkat itu
+            $siswaTingkat = match ($tingkat) {
+                '10' => Siswa::whereNotNull('tingkat_10')->whereNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                '11' => Siswa::whereNotNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                '12' => Siswa::whereNotNull('tingkat_12')->get(),
+                default => collect(),
+            };
+
+            // Ambil daftar siswa yang dikecualikan (konversi ke int)
+            $kecuali = collect($data['kecuali_siswa_tingkat'] ?? [])
+                ->map(fn($id) => (int) $id)
+                ->toArray();
+
+            // Buat array pivot lengkap: siswa_id => ['dikecualikan' => true/false]
+            $syncData = [];
+            foreach ($siswaTingkat as $siswa) {
+                $syncData[$siswa->id] = [
+                    'dikecualikan' => in_array($siswa->id, $kecuali),
+                ];
+            }
+
+            $record->siswa()->sync($syncData);
+            return;
+        }
+
+        // 🟩 CASE 3: Apresiasi berdasarkan tingkat + jurusan
+        if ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
             $kelas = KelasSiswa::find($record->kelas_siswa_id);
             if (!$kelas) return;
 
-            $tingkat = $kelas->tingkat;
-            $siswaAktif = Siswa::all()->filter(function ($siswa) use ($tingkat, $kelas) {
-                $aktif = $siswa->tingkat_10 ? '10' : ($siswa->tingkat_11 ? '11' : ($siswa->tingkat_12 ? '12' : null));
-                return match ($tingkat) {
-                    '10' => $aktif === '10' && $siswa->tingkat_10 == $kelas->id,
-                    '11' => $aktif === '11' && $siswa->tingkat_11 == $kelas->id,
-                    '12' => $aktif === '12' && $siswa->tingkat_12 == $kelas->id,
-                    default => false,
-                };
-            });
+            // Ambil semua siswa yang terkait dengan kelas tersebut (pada tingkat mana pun)
+            $siswaKelas = Siswa::query()
+                ->where(
+                    fn($query) =>
+                    $query->where('tingkat_10', $kelas->id)
+                        ->orWhere('tingkat_11', $kelas->id)
+                        ->orWhere('tingkat_12', $kelas->id)
+                )
+                ->pluck('id')
+                ->map(fn($id) => (int) $id)
+                ->toArray();
 
-            $semuaIds = $siswaAktif->pluck('id')->map(fn($id) => (int) $id)->toArray();
-            $kecuali = array_map('intval', $data['kecuali_siswa_jurusan'] ?? []);
-            $siswaIds = array_values(array_diff($semuaIds, $kecuali));
-        }
+            // Ambil daftar siswa yang dikecualikan
+            $kecuali = collect($data['kecuali_siswa_jurusan'] ?? [])
+                ->map(fn($id) => (int) $id)
+                ->toArray();
 
-        if (!empty($siswaIds)) {
-            $record->siswa()->sync($siswaIds);
+            // Hanya siswa yang tidak dikecualikan
+            $siswaFinal = array_diff($siswaKelas, $kecuali);
+
+            if (!empty($siswaFinal)) {
+                $record->siswa()->sync($siswaFinal);
+            }
+            return;
         }
     }
 }

@@ -28,41 +28,57 @@ class EditApresiasi extends EditRecord
         $data = $this->form->getState();
         $siswaIds = [];
 
+        // --- 1. Jika apresiasi untuk siswa spesifik ---
         if ($record->tipe_apresiasi === 'spesifik') {
             $siswaIds = array_map('intval', $data['siswa'] ?? []);
-        } elseif ($record->tipe_apresiasi === 'tingkat' && $record->tingkat) {
-            $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($record) {
-                $aktif = $siswa->tingkat_10 ? '10' : ($siswa->tingkat_11 ? '11' : ($siswa->tingkat_12 ? '12' : null));
-                return $aktif === $record->tingkat;
+        }
+
+        // --- 2. Jika apresiasi berdasarkan tingkat ---
+        elseif ($record->tipe_apresiasi === 'tingkat' && $record->tingkat) {
+            $tingkat = $record->tingkat;
+
+            // 🔹 Ambil semua siswa di tingkat tersebut
+            $siswaTingkat = Siswa::all()->filter(function ($siswa) use ($tingkat) {
+                if ($siswa->tingkat_12) $aktif = '12';
+                elseif ($siswa->tingkat_11) $aktif = '11';
+                elseif ($siswa->tingkat_10) $aktif = '10';
+                else $aktif = null;
+
+                return $aktif === $tingkat;
             });
 
-            $semuaIds = $semuaSiswa->pluck('id')->map(fn($id) => (int) $id)->toArray();
-            $kecuali = array_map('intval', $data['kecuali_siswa_tingkat'] ?? []);
-            $siswaIds = array_values(array_diff($semuaIds, $kecuali));
-        } elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
+            // 🔹 Ambil siswa yang dikecualikan dari form
+            $kecuali = collect($data['kecuali_siswa_tingkat'] ?? [])->map(fn($id) => (int) $id);
+
+            // 🔹 Sinkronisasi pivot
+            $syncData = [];
+            foreach ($siswaTingkat as $siswa) {
+                $syncData[$siswa->id] = [
+                    'dikecualikan' => $kecuali->contains($siswa->id),
+                ];
+            }
+
+            $record->siswa()->sync($syncData);
+        }
+
+        // --- 3. Jika apresiasi berdasarkan tingkat & jurusan ---
+        elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
             $kelas = KelasSiswa::find($record->kelas_siswa_id);
             if (!$kelas) return;
 
-            $tingkat = $kelas->tingkat;
-            $siswaAktif = Siswa::all()->filter(function ($siswa) use ($tingkat, $kelas) {
-                $aktif = $siswa->tingkat_10 ? '10' : ($siswa->tingkat_11 ? '11' : ($siswa->tingkat_12 ? '12' : null));
-                return match ($tingkat) {
-                    '10' => $aktif === '10' && $siswa->tingkat_10 == $kelas->id,
-                    '11' => $aktif === '11' && $siswa->tingkat_11 == $kelas->id,
-                    '12' => $aktif === '12' && $siswa->tingkat_12 == $kelas->id,
-                    default => false,
-                };
-            });
+            $siswaKelas = Siswa::query()
+                ->where(function ($query) use ($kelas) {
+                    $query->where('tingkat_10', $kelas->id)
+                        ->orWhere('tingkat_11', $kelas->id)
+                        ->orWhere('tingkat_12', $kelas->id);
+                })
+                ->pluck('id')
+                ->toArray();
 
-            $semuaIds = $siswaAktif->pluck('id')->map(fn($id) => (int) $id)->toArray();
             $kecuali = array_map('intval', $data['kecuali_siswa_jurusan'] ?? []);
-            $siswaIds = array_values(array_diff($semuaIds, $kecuali));
-        }
+            $siswaIds = array_values(array_diff($siswaKelas, $kecuali));
 
-        if (!empty($siswaIds)) {
             $record->siswa()->sync($siswaIds);
-        } else {
-            $record->siswa()->detach();
         }
     }
 }

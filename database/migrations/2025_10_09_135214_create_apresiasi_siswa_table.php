@@ -10,6 +10,7 @@ return new class extends Migration {
         Schema::create('apresiasi_siswa', function (Blueprint $table) {
             $table->id();
             $table->foreignId('apresiasi_id')->constrained('apresiasis')->cascadeOnDelete();
+            $table->boolean('dikecualikan')->default(false);
             $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
             $table->timestamps();
         });

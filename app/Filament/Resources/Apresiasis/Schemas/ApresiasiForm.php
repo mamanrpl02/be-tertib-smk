@@ -84,40 +84,42 @@ class ApresiasiForm
                     ->reactive()
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat'),
 
-                // --- Berdasarkan Tingkat ---
                 Select::make('kecuali_siswa_tingkat')
                     ->label('Kecuali Siswa di Tingkat Ini')
                     ->helperText('Semua siswa di tingkat ini akan mendapatkan apresiasi, kecuali siswa yang dipilih.')
                     ->multiple()
                     ->options(function ($get, $record) {
-                        $tingkat = $get('tingkat');
+                        $tingkat = $get('tingkat') ?? $record?->tingkat;
                         if (!$tingkat) return [];
 
-                        // Semua siswa di tingkat tersebut
-                        $semuaSiswa = Siswa::all()->filter(function ($siswa) use ($tingkat) {
-                            if ($siswa->tingkat_12) $aktif = '12';
-                            elseif ($siswa->tingkat_11) $aktif = '11';
-                            elseif ($siswa->tingkat_10) $aktif = '10';
-                            else $aktif = null;
+                        // Ambil siswa yang BENAR-BENAR aktif di tingkat tersebut
+                        $students = match ($tingkat) {
+                            '10' => Siswa::whereNotNull('tingkat_10')->whereNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                            '11' => Siswa::whereNotNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                            '12' => Siswa::whereNotNull('tingkat_12')->get(),
+                            default => collect(),
+                        };
 
-                            return $aktif === $tingkat;
-                        });
-
-                        // Ambil ID siswa yang sudah ada di pivot
-                        $pivotIds = $record?->siswa()->pluck('siswas.id')->toArray() ?? [];
-
-                        // Hanya tampilkan siswa yang belum dipilih
-                        return $semuaSiswa->whereNotIn('id', $pivotIds)->pluck('nama', 'id')->toArray();
+                        // semua opsi diubah ke string key agar validasi aman
+                        return $students->pluck('nama', 'id')
+                            ->mapWithKeys(fn($label, $id) => [(string) $id => $label])
+                            ->toArray();
                     })
                     ->afterStateHydrated(function ($state, $set, $record) {
-                        if (!$record || !$record->tingkat) return;
+                        if (!$record) return;
 
-                        // Siswa yang sudah dipilih sebelumnya
-                        $pivotIds = $record->siswa()->pluck('siswas.id')->toArray();
+                        // Ambil siswa yang dikecualikan
+                        $selected = $record->siswa()
+                            ->where('apresiasi_siswa.dikecualikan', true)
+                            ->pluck('siswas.id')
+                            ->map(fn($id) => (string) $id) // harus string agar match dengan options()
+                            ->toArray();
 
-                        $set('kecuali_siswa_tingkat', $pivotIds);
+                        $set('kecuali_siswa_tingkat', $selected);
                     })
+                    ->getOptionLabelUsing(fn($value) => Siswa::find((int)$value)?->nama ?? "Siswa #$value")
                     ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat')
+                    ->reactive()
                     ->searchable()
                     ->preload(),
 
