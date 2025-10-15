@@ -15,15 +15,15 @@ class KelasSiswasTable
         return $table
             ->columns([
                 TextColumn::make('tingkat'),
-                TextColumn::make('jurusan.nama_jurusan')
+
+                TextColumn::make('jurusan')
                     ->label('Jurusan')
-                    ->formatStateUsing(function ($state, $record) {
-                        return $record->jurusan
-                            ? "{$record->jurusan->nama_jurusan} ({$record->jurusan->sub_kelas})"
-                            : '-';
-                    })
                     ->sortable()
                     ->searchable(),
+
+                TextColumn::make('sub_kelas')
+                    ->label('Sub Kelas')
+                    ->sortable(),
 
                 TextColumn::make('waliKelas.name')
                     ->label('Wali Kelas')

@@ -69,27 +69,23 @@ class SiswaForm
                 Select::make('tingkat_10')
                     ->label('Kelas Tingkat 10')
                     ->options(
-                        \App\Models\KelasSiswa::with('jurusan')
-                            ->where('tingkat', '10')
+                        \App\Models\KelasSiswa::where('tingkat', '10')
                             ->get()
                             ->mapWithKeys(fn($kelas) => [
-                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan} {$kelas->jurusan->sub_kelas}"
+                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan} {$kelas->sub_kelas}"
                             ])
                     )
                     ->searchable()
                     ->preload()
                     ->nullable(),
 
-
-
                 Select::make('tingkat_11')
                     ->label('Kelas Tingkat 11')
                     ->options(
-                        \App\Models\KelasSiswa::with('jurusan')
-                            ->where('tingkat', '11')
+                        \App\Models\KelasSiswa::where('tingkat', '11')
                             ->get()
                             ->mapWithKeys(fn($kelas) => [
-                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan} {$kelas->jurusan->sub_kelas}"
+                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan} {$kelas->sub_kelas}"
                             ])
                     )
                     ->searchable()
@@ -99,11 +95,10 @@ class SiswaForm
                 Select::make('tingkat_12')
                     ->label('Kelas Tingkat 12')
                     ->options(
-                        \App\Models\KelasSiswa::with('jurusan')
-                            ->where('tingkat', '12')
+                        \App\Models\KelasSiswa::where('tingkat', '12')
                             ->get()
                             ->mapWithKeys(fn($kelas) => [
-                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan->nama_jurusan} {$kelas->jurusan->sub_kelas}"
+                                $kelas->id => "{$kelas->tingkat} - {$kelas->jurusan} {$kelas->sub_kelas}"
                             ])
                     )
                     ->searchable()

@@ -16,19 +16,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'maman@tertib.com',
             'password' => bcrypt('12341234'),
         ]);
-
-        $jurusans = [
-            ['nama_jurusan' => 'Rekayasa Perangkat Lunak (RPL)', 'sub_kelas' => 'A'],
-            ['nama_jurusan' => 'Rekayasa Perangkat Lunak (RPL)', 'sub_kelas' => 'B'],
-            ['nama_jurusan' => 'Teknik Kendaraan Ringan Otomotif (TKRO)', 'sub_kelas' => 'A'],
-            ['nama_jurusan' => 'Teknik Kendaraan Ringan Otomotif (TKRO)', 'sub_kelas' => 'B'],
-            ['nama_jurusan' => 'Teknik Alat Berat', 'sub_kelas' => 'A'],
-        ];
-
-        foreach ($jurusans as $data) {
-            Jurusan::create($data);
-        }
-
+        
         $this->call([
             KelasSiswaSeeder::class,
         ]);

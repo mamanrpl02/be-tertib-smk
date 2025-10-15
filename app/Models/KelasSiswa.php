@@ -11,7 +11,8 @@ class KelasSiswa extends Model
 
     protected $fillable = [
         'tingkat',
-        'jurusan_id',
+        'jurusan',
+        'sub_kelas',
         'wali_kelas',
         's_ganjil',
         's_genap',
@@ -21,10 +22,6 @@ class KelasSiswa extends Model
 
     // 🔗 Relasi ke jurusan
 
-    public function jurusan()
-    {
-        return $this->belongsTo(Jurusan::class);
-    }
 
     // 🔗 Relasi ke siswa
     public function siswa()
