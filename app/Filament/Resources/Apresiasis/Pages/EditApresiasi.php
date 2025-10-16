@@ -26,26 +26,25 @@ class EditApresiasi extends EditRecord
     {
         $record = $this->record;
         $data = $this->form->getState();
-        $siswaIds = [];
 
-        // --- 1. Jika apresiasi untuk siswa spesifik ---
+        // --- 1️⃣ Jika apresiasi untuk siswa spesifik ---
         if ($record->tipe_apresiasi === 'spesifik') {
             $siswaIds = array_map('intval', $data['siswa'] ?? []);
+            $record->siswa()->sync($siswaIds);
+            return;
         }
 
-        // --- 2. Jika apresiasi berdasarkan tingkat ---
+        // --- 2️⃣ Jika apresiasi berdasarkan tingkat ---
         elseif ($record->tipe_apresiasi === 'tingkat' && $record->tingkat) {
             $tingkat = $record->tingkat;
 
-            // 🔹 Ambil semua siswa di tingkat tersebut
-            $siswaTingkat = Siswa::all()->filter(function ($siswa) use ($tingkat) {
-                if ($siswa->tingkat_12) $aktif = '12';
-                elseif ($siswa->tingkat_11) $aktif = '11';
-                elseif ($siswa->tingkat_10) $aktif = '10';
-                else $aktif = null;
-
-                return $aktif === $tingkat;
-            });
+            // 🔹 Ambil semua siswa aktif di tingkat tersebut
+            $siswaTingkat = match ($tingkat) {
+                '10' => Siswa::whereNotNull('tingkat_10')->whereNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                '11' => Siswa::whereNotNull('tingkat_11')->whereNull('tingkat_12')->get(),
+                '12' => Siswa::whereNotNull('tingkat_12')->get(),
+                default => collect(),
+            };
 
             // 🔹 Ambil siswa yang dikecualikan dari form
             $kecuali = collect($data['kecuali_siswa_tingkat'] ?? [])->map(fn($id) => (int) $id);
@@ -59,26 +58,47 @@ class EditApresiasi extends EditRecord
             }
 
             $record->siswa()->sync($syncData);
+            return;
         }
 
-        // --- 3. Jika apresiasi berdasarkan tingkat & jurusan ---
+        // --- 3️⃣ Jika apresiasi berdasarkan tingkat & jurusan ---
         elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
             $kelas = KelasSiswa::find($record->kelas_siswa_id);
-            if (!$kelas) return;
+            if (! $kelas) return;
 
-            $siswaKelas = Siswa::query()
-                ->where(function ($query) use ($kelas) {
-                    $query->where('tingkat_10', $kelas->id)
-                        ->orWhere('tingkat_11', $kelas->id)
-                        ->orWhere('tingkat_12', $kelas->id);
-                })
-                ->pluck('id')
-                ->toArray();
+            $tingkat = $kelas->tingkat;
+            $jurusan = $kelas->jurusan;
 
-            $kecuali = array_map('intval', $data['kecuali_siswa_jurusan'] ?? []);
-            $siswaIds = array_values(array_diff($siswaKelas, $kecuali));
+            // 🔹 Ambil semua siswa aktif sesuai tingkat + jurusan
+            $siswaKelas = match ($tingkat) {
+                '10' => Siswa::whereHas('kelasTingkat10', fn($q) => $q->where('jurusan', $jurusan))
+                    ->whereNull('tingkat_11')
+                    ->whereNull('tingkat_12')
+                    ->get(),
 
-            $record->siswa()->sync($siswaIds);
+                '11' => Siswa::whereHas('kelasTingkat11', fn($q) => $q->where('jurusan', $jurusan))
+                    ->whereNull('tingkat_12')
+                    ->get(),
+
+                '12' => Siswa::whereHas('kelasTingkat12', fn($q) => $q->where('jurusan', $jurusan))
+                    ->get(),
+
+                default => collect(),
+            };
+
+            // 🔹 Ambil siswa yang dikecualikan dari form
+            $kecuali = collect($data['kecuali_siswa_jurusan'] ?? [])->map(fn($id) => (int) $id);
+
+            // 🔹 Sinkronisasi pivot
+            $syncData = [];
+            foreach ($siswaKelas as $siswa) {
+                $syncData[$siswa->id] = [
+                    'dikecualikan' => $kecuali->contains($siswa->id),
+                ];
+            }
+
+            $record->siswa()->sync($syncData);
+            return;
         }
     }
 }

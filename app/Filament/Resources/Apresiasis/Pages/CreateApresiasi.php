@@ -73,34 +73,43 @@ class CreateApresiasi extends CreateRecord
         }
 
         // 🟩 CASE 3: Apresiasi berdasarkan tingkat + jurusan
-        if ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
+        // --- 3. Jika apresiasi berdasarkan tingkat & jurusan ---
+        elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
             $kelas = KelasSiswa::find($record->kelas_siswa_id);
             if (!$kelas) return;
 
-            // Ambil semua siswa yang terkait dengan kelas tersebut (pada tingkat mana pun)
-            $siswaKelas = Siswa::query()
-                ->where(
-                    fn($query) =>
-                    $query->where('tingkat_10', $kelas->id)
-                        ->orWhere('tingkat_11', $kelas->id)
-                        ->orWhere('tingkat_12', $kelas->id)
-                )
-                ->pluck('id')
-                ->map(fn($id) => (int) $id)
-                ->toArray();
+            $tingkat = $kelas->tingkat;
+            $jurusan = $kelas->jurusan;
 
-            // Ambil daftar siswa yang dikecualikan
-            $kecuali = collect($data['kecuali_siswa_jurusan'] ?? [])
-                ->map(fn($id) => (int) $id)
-                ->toArray();
+            // 🔹 Ambil siswa aktif sesuai tingkat & jurusan
+            $siswaKelas = match ($tingkat) {
+                '10' => Siswa::whereHas('kelasTingkat10', fn($q) => $q->where('jurusan', $jurusan))
+                    ->whereNull('tingkat_11')
+                    ->whereNull('tingkat_12')
+                    ->get(),
 
-            // Hanya siswa yang tidak dikecualikan
-            $siswaFinal = array_diff($siswaKelas, $kecuali);
+                '11' => Siswa::whereHas('kelasTingkat11', fn($q) => $q->where('jurusan', $jurusan))
+                    ->whereNull('tingkat_12')
+                    ->get(),
 
-            if (!empty($siswaFinal)) {
-                $record->siswa()->sync($siswaFinal);
+                '12' => Siswa::whereHas('kelasTingkat12', fn($q) => $q->where('jurusan', $jurusan))
+                    ->get(),
+
+                default => collect(),
+            };
+
+            // 🔹 Ambil siswa yang dikecualikan dari form
+            $kecuali = collect($data['kecuali_siswa_jurusan'] ?? [])->map(fn($id) => (int) $id);
+
+            // 🔹 Sinkronisasi pivot dengan flag dikecualikan
+            $syncData = [];
+            foreach ($siswaKelas as $siswa) {
+                $syncData[$siswa->id] = [
+                    'dikecualikan' => $kecuali->contains($siswa->id),
+                ];
             }
-            return;
+
+            $record->siswa()->sync($syncData);
         }
     }
 }
