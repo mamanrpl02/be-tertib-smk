@@ -11,43 +11,37 @@ class KelasSiswa extends Model
 
     protected $fillable = [
         'tingkat',
-        'jurusan_id',
+        'jurusan',
+        'sub_kelas',
         'wali_kelas',
         's_ganjil',
         's_genap',
     ];
 
-    // Relasi ke jurusan
-    public function jurusan()
+
+
+    // 🔗 Relasi ke jurusan
+
+
+    // 🔗 Relasi ke siswa
+    public function siswa()
     {
-        return $this->belongsTo(Jurusan::class);
+        return $this->hasMany(Siswa::class, 'kelas_siswa_id');
     }
 
-    // Relasi ke siswa di tiap tingkat
-    public function siswas10()
-    {
-        return $this->hasMany(Siswa::class, 'tingkat_10');
-    }
-
-    public function siswas11()
-    {
-        return $this->hasMany(Siswa::class, 'tingkat_11');
-    }
-
-    public function siswas12()
-    {
-        return $this->hasMany(Siswa::class, 'tingkat_12');
-    }
-
-    // Nama kelas gabungan
-    public function getNamaKelasAttribute(): string
-    {
-        return "{$this->tingkat} - {$this->jurusan->nama}";
-    }
-
-
+    // 🔗 Relasi wali kelas (User)
     public function waliKelas()
     {
-        return $this->belongsTo(\App\Models\User::class, 'wali_kelas');
+        return $this->belongsTo(User::class, 'wali_kelas');
+    }
+
+    // 🧩 Accessor nama kelas
+    public function getNamaKelasAttribute(): string
+    {
+        // Asumsinya di tabel kelas_siswas ada kolom: tingkat, jurusan, dan nama_kelas
+        $jurusanNama = $this->  jurusan ?? '-';
+        $namaKelas = $this->sub_kelas ?? '-';
+
+        return "{$this->tingkat} {$namaKelas} {$jurusanNama}";
     }
 }

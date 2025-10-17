@@ -17,11 +17,12 @@ class KelasSiswaForm
                 Select::make('tingkat')
                     ->options(['10' => '10', '11' => '11', '12' => '12'])
                     ->required(),
-                Select::make('jurusan_id')
-                    ->label('Jurusan')
-                    ->relationship('jurusan', 'nama') // relasi ke model Jurusan
-                    ->searchable()
-                    ->preload()
+                Select::make('jurusan')
+                    ->options(['Teknik Kendaraan Ringan Otomotif (TKRO)' => 'Teknik Kendaraan Ringan Otomotif (TKRO)', 'Rekayasa Preangkat Lunak (RPL)' => 'Rekayasa Preangkat Lunak (RPL)'])
+                    ->required(),
+
+                Select::make('sub_kelas')
+                    ->options(['A' => 'A', 'B' => 'B', 'C' => 'C', 'D' => 'D', 'E' => 'E'])
                     ->required(),
 
                 Select::make('wali_kelas')

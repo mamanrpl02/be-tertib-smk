@@ -2,23 +2,25 @@
 
 namespace Database\Seeders;
 
+use App\Models\Jurusan;
+use App\Models\KelasSiswa;
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
 {
-    /**
-     * Seed the application's database.
-     */
     public function run(): void
     {
-        // User::factory(10)->create();
-
         User::factory()->create([
             'name' => 'Admin Maman',
             'email' => 'maman@tertib.com',
             'password' => bcrypt('12341234'),
         ]);
+        
+        $this->call([
+            KelasSiswaSeeder::class,
+        ]);
+        $this->call(SiswaSeeder::class);
+        // $this->call(ApresiasiSeeder::class);
     }
 }

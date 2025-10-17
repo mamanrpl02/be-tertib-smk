@@ -15,9 +15,16 @@ class KelasSiswasTable
         return $table
             ->columns([
                 TextColumn::make('tingkat'),
-                TextColumn::make('jurusan.nama')
-                    ->numeric()
+
+                TextColumn::make('jurusan')
+                    ->label('Jurusan')
+                    ->sortable()
+                    ->searchable(),
+
+                TextColumn::make('sub_kelas')
+                    ->label('Sub Kelas')
                     ->sortable(),
+
                 TextColumn::make('waliKelas.name')
                     ->label('Wali Kelas')
                     ->searchable()
@@ -27,7 +34,7 @@ class KelasSiswasTable
                     ->searchable(),
                 TextColumn::make('s_genap')
                     ->searchable(),
-                    
+
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
