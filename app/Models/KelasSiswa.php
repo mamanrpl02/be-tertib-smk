@@ -38,7 +38,10 @@ class KelasSiswa extends Model
     // 🧩 Accessor nama kelas
     public function getNamaKelasAttribute(): string
     {
-        $jurusanNama = $this->jurusan ? $this->jurusan->nama_jurusan : 'Tanpa Jurusan';
-        return "{$this->tingkat} - {$jurusanNama}";
+        // Asumsinya di tabel kelas_siswas ada kolom: tingkat, jurusan, dan nama_kelas
+        $jurusanNama = $this->  jurusan ?? '-';
+        $namaKelas = $this->sub_kelas ?? '-';
+
+        return "{$this->tingkat} {$namaKelas} {$jurusanNama}";
     }
 }

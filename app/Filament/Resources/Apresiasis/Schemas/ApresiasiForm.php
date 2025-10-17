@@ -47,21 +47,32 @@ class ApresiasiForm
                     ->label('Pilih Siswa Spesifik')
                     ->multiple()
                     ->options(function ($get, $record) {
-                        // Ambil semua siswa
-                        $allSiswa = \App\Models\Siswa::pluck('nama', 'id');
+                        $allSiswa = \App\Models\Siswa::with([
+                            'kelasTingkat10',
+                            'kelasTingkat11',
+                            'kelasTingkat12',
+                        ])
+                            ->get()
+                            ->mapWithKeys(function ($siswa) {
+                                $kelas = $siswa->kelasTingkat12
+                                    ?: ($siswa->kelasTingkat11
+                                        ?: ($siswa->kelasTingkat10));
 
-                        // Ambil siswa yang sudah terpilih dari record (jika ada)
+                                return [
+                                    $siswa->id => "{$siswa->nama} - " . ($kelas?->nama_kelas ?? '-') . ""
+                                ];
+                            });
+
                         $selectedIds = $record
                             ? $record->siswa()->pluck('siswas.id')->toArray()
                             : [];
 
-                        // Filter siswa agar tidak muncul 2x di daftar (kecuali yang sudah terpilih)
-                        $filtered = \App\Models\Siswa::whereNotIn('id', $selectedIds)
-                            ->pluck('nama', 'id');
+                        $filtered = $allSiswa->except($selectedIds);
 
-                        // Gabungkan siswa yang sudah terpilih agar tetap bisa tampil label-nya saat edit
                         return $filtered->union($allSiswa->only($selectedIds));
                     })
+
+
                     ->afterStateHydrated(function ($state, $set, $record) {
                         if (!$record) return;
 
@@ -129,7 +140,6 @@ class ApresiasiForm
                         return \App\Models\KelasSiswa::all()
                             ->groupBy(fn($k) => "{$k->tingkat}-{$k->jurusan}") // grup berdasarkan tingkat & jurusan
                             ->mapWithKeys(function ($group) {
-                                // ambil salah satu data (pertama) dari grup, tapi pakai ID-nya sebagai key
                                 $first = $group->first();
                                 return [
                                     $first->id => "{$first->tingkat} - {$first->jurusan}"
@@ -138,6 +148,7 @@ class ApresiasiForm
                             ->sortKeys()
                             ->toArray();
                     })
+                    ->visible(fn($get) => $get('tipe_apresiasi') === 'tingkat_jurusan') // ⬅️ pindah ke sini
                     ->searchable()
                     ->preload(),
 

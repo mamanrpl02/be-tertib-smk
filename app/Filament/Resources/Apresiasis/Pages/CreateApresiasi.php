@@ -72,8 +72,7 @@ class CreateApresiasi extends CreateRecord
             return;
         }
 
-        // 🟩 CASE 3: Apresiasi berdasarkan tingkat + jurusan
-        // --- 3. Jika apresiasi berdasarkan tingkat & jurusan ---
+        // 🟩 CASE 3: Apresiasi berdasarkan tingkat + jurusan 
         elseif ($record->tipe_apresiasi === 'tingkat_jurusan' && $record->kelas_siswa_id) {
             $kelas = KelasSiswa::find($record->kelas_siswa_id);
             if (!$kelas) return;
