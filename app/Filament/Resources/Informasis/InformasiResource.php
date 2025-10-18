@@ -27,7 +27,7 @@ class InformasiResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return InformasiForm::configure($schema);
-    }
+    }   
 
     public static function table(Table $table): Table
     {
