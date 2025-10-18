@@ -110,4 +110,10 @@ class Siswa extends Authenticatable
             }
         });
     }
+
+    public function informasiLikes()
+    {
+        return $this->belongsToMany(\App\Models\Informasi::class, 'informasi_siswa_likes')
+            ->withTimestamps();
+    }
 }
