@@ -23,6 +23,9 @@ class Siswa extends Authenticatable
         'tingkat_12',
     ];
 
+    protected $hidden = ['password', 'remember_token'];
+
+
     public function kelasTingkat()
     {
         if ($this->tingkat_12) {
@@ -38,7 +41,6 @@ class Siswa extends Authenticatable
     }
 
 
-    protected $hidden = ['password', 'remember_token'];
 
     public function apresiasis()
     {
