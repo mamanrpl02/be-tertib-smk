@@ -83,4 +83,9 @@ class LaporanPelanggaran extends Model
     {
         return $this->updaterUser ?? $this->updaterSiswa;
     }
+
+    public function likedBy()
+    {
+        return $this->belongsToMany(Siswa::class, 'laporan_siswa_likes')->withTimestamps();
+    }
 }

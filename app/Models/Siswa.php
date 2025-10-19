@@ -124,4 +124,15 @@ class Siswa extends Authenticatable
         return $this->belongsToMany(\App\Models\Informasi::class, 'informasi_siswa_likes')
             ->withTimestamps();
     }
+
+    public function likedApresiasi()
+    {
+        return $this->belongsToMany(Apresiasi::class, 'apresiasi_siswa_likes')
+            ->withTimestamps();
+    }
+
+    public function likedLaporans()
+    {
+        return $this->belongsToMany(LaporanPelanggaran::class, 'laporan_siswa_likes')->withTimestamps();
+    }
 }

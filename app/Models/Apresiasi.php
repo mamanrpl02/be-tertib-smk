@@ -27,6 +27,14 @@ class Apresiasi extends Model
     ];
 
     // 🔗 RELASI
+
+    public function likedBy()
+    {
+        return $this->belongsToMany(Siswa::class, 'apresiasi_siswa_likes')
+            ->withTimestamps();
+    }
+
+
     public function siswa()
     {
         return $this->belongsToMany(Siswa::class, 'apresiasi_siswa');
