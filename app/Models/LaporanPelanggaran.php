@@ -10,11 +10,13 @@ class LaporanPelanggaran extends Model
     use HasFactory;
 
     protected $fillable = [
-        'siswa_id',
         'pelanggaran_id',
         'fl_beranda',
         'fl_toleransi',
         'deskripsi',
+        'tipe_laporan',
+        'tingkat',
+        'kelas_siswa_id',
         'bukti_pelanggaran',
         'status_laporan',
         'approved_by',
@@ -25,7 +27,13 @@ class LaporanPelanggaran extends Model
     // 🔗 Relasi ke Siswa (pelaku)
     public function siswa()
     {
-        return $this->belongsTo(Siswa::class);
+        return $this->belongsToMany(Siswa::class, 'laporan_pelanggaran_siswa')
+            ->withTimestamps();
+    }
+
+    public function kelasSiswa()
+    {
+        return $this->belongsTo(KelasSiswa::class);
     }
 
     // 🔗 Relasi ke Pelanggaran (jenis pelanggaran)
@@ -41,13 +49,12 @@ class LaporanPelanggaran extends Model
     }
 
     // 🔗 Relasi ke User (jika dibuat oleh user)
-    public function creatorUser()
+    public function creator_user()
     {
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    // 🔗 Relasi ke Siswa (jika dibuat oleh siswa)
-    public function creatorSiswa()
+    public function creator_siswa()
     {
         return $this->belongsTo(Siswa::class, 'created_by');
     }

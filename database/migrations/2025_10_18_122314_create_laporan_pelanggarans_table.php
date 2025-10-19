@@ -13,11 +13,17 @@ return new class extends Migration
     {
         Schema::create('laporan_pelanggarans', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('siswa_id')->constrained('siswas')->cascadeOnDelete();
             $table->foreignId('pelanggaran_id')->constrained('pelanggarans')->cascadeOnDelete();
             $table->boolean('fl_beranda')->default(false); // tampil di beranda atau tidak
             $table->boolean('fl_toleransi')->default(false); // apakah masih diberi toleransi
             $table->text('deskripsi')->nullable(); // keterangan tambahan
+            // tipe penerima apresiasi
+            $table->enum('tipe_laporan', ['spesifik', 'tingkat', 'tingkat_jurusan'])->nullable();
+
+            // jika berdasarkan tingkat atau jurusan
+            $table->enum('tingkat', ['10', '11', '12'])->nullable();
+            $table->foreignId('kelas_siswa_id')->nullable()->constrained('kelas_siswas')->nullOnDelete();
+
             $table->string('bukti_pelanggaran')->nullable(); // upload bukti (foto/dokumen)
             $table->enum('status_laporan', ['pending', 'approved', 'rejected'])->default('pending');
             $table->foreignId('approved_by')->nullable()->constrained('users')->nullOnDelete();

@@ -48,6 +48,14 @@ class Siswa extends Authenticatable
     }
 
 
+    public function laporanPelanggaran()
+    {
+        return $this->belongsToMany(LaporanPelanggaran::class, 'laporan_pelanggaran_siswa')
+            ->withTimestamps();
+    }
+
+
+
     public function kelasSiswa()
     {
         return $this->belongsTo(KelasSiswa::class, 'kelas_siswa_id');

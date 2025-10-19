@@ -18,8 +18,7 @@ class PelanggaransTable
                 TextColumn::make('pelanggaran')->searchable(),
                 TextColumn::make('poin')->sortable(),
                 TextColumn::make('creator.name')->label('Dibuat Oleh')->default('-'),
-                TextColumn::make('updater.name')->label('Diperbarui Oleh')->default('-'),
-                TextColumn::make('created_at')->dateTime()->label('Dibuat Pada'),
+                
             ])
             ->filters([
                 //
