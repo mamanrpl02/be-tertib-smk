@@ -20,7 +20,10 @@ class LaporanPelanggaranResource extends Resource
 {
     protected static ?string $model = LaporanPelanggaran::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
+
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedDocumentText;
 
     protected static ?string $recordTitleAttribute = 'pelanggaran_id';
 

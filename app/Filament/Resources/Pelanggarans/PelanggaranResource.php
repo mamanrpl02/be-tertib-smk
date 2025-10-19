@@ -18,7 +18,10 @@ class PelanggaranResource extends Resource
 {
     protected static ?string $model = Pelanggaran::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
+
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedNoSymbol;
 
     protected static ?string $recordTitleAttribute = 'pelanggaran';
 

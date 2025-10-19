@@ -16,31 +16,34 @@ use Filament\Support\Icons\Heroicon;
 
 class SiswaResource extends Resource
 {
-    protected static ?string $model = Siswa::class;
+    protected static ?string $model = \App\Models\Siswa::class;
 
     protected static ?string $navigationLabel = 'Siswa';
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Manajemen Data Siswa';
 
+    protected static ?int $navigationSort = 1;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUserGroup;
 
     protected static ?string $recordTitleAttribute = 'nama';
 
     public static function form(Schema $schema): Schema
     {
-        return SiswaForm::configure($schema);
+        return \App\Filament\Resources\Siswas\Schemas\SiswaForm::configure($schema);
     }
 
     public static function table(Table $table): Table
     {
-        return SiswasTable::configure($table);
+        return \App\Filament\Resources\Siswas\Tables\SiswasTable::configure($table);
     }
 
     public static function getPages(): array
     {
         return [
-            'index' => ListSiswas::route('/'),
-            'create' => CreateSiswa::route('/create'),
-            'edit' => EditSiswa::route('/{record}/edit'), 
+            'index' => \App\Filament\Resources\Siswas\Pages\ListSiswas::route('/'),
+            'create' => \App\Filament\Resources\Siswas\Pages\CreateSiswa::route('/create'),
+            'edit' => \App\Filament\Resources\Siswas\Pages\EditSiswa::route('/{record}/edit'),
         ];
     }
 }

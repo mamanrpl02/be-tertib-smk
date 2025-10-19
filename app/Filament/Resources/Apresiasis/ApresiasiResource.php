@@ -18,7 +18,9 @@ class ApresiasiResource extends Resource
 {
     protected static ?string $model = Apresiasi::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTrophy;
 
     protected static ?string $recordTitleAttribute = 'nama';
 

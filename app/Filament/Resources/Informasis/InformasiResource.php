@@ -20,14 +20,16 @@ class InformasiResource extends Resource
 {
     protected static ?string $model = Informasi::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static string|\UnitEnum|null $navigationGroup = 'Informasi & Pengumuman';
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
 
     protected static ?string $recordTitleAttribute = 'nama';
 
     public static function form(Schema $schema): Schema
     {
         return InformasiForm::configure($schema);
-    }   
+    }
 
     public static function table(Table $table): Table
     {
