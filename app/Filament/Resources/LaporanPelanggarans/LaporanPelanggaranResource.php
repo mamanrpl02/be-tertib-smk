@@ -20,6 +20,8 @@ class LaporanPelanggaranResource extends Resource
 {
     protected static ?string $model = LaporanPelanggaran::class;
 
+    protected static ?string $navigationLabel = 'Laporan Pelanggaran';
+
     protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
 
 

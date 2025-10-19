@@ -18,6 +18,9 @@ class ApresiasiResource extends Resource
 {
     protected static ?string $model = Apresiasi::class;
 
+    protected static ?string $navigationLabel = 'Apresiasi';
+
+
     protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTrophy;

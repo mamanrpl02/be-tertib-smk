@@ -18,6 +18,9 @@ class PelanggaranResource extends Resource
 {
     protected static ?string $model = Pelanggaran::class;
 
+    protected static ?string $navigationLabel = 'Pelanggaran';
+
+
     protected static string|\UnitEnum|null $navigationGroup = 'Data Apresiasi & Pelanggaran';
 
 

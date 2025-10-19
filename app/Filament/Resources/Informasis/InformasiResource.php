@@ -20,6 +20,8 @@ class InformasiResource extends Resource
 {
     protected static ?string $model = Informasi::class;
 
+    protected static ?string $navigationLabel = 'Informasi';
+
     protected static string|\UnitEnum|null $navigationGroup = 'Informasi & Pengumuman';
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedMegaphone;
