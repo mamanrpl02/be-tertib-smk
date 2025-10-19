@@ -1,14 +1,7 @@
 <?php
 
-use App\Models\Siswa;
-use App\Models\KelasSiswa;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Laravel\Sanctum\PersonalAccessToken;
-use App\Http\Controllers\Api\SiswaController;
 use App\Http\Controllers\SiswaProfileController;
 use App\Http\Controllers\Api\AuthSiswaController;
 

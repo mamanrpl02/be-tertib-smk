@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('pelanggarans', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('pasal_id')->constrained('pasals')->cascadeOnDelete();
             $table->integer('ayat')->nullable(); // bisa diisi nomor ayat peraturan
             $table->string('pelanggaran'); // deskripsi pelanggaran
             $table->integer('poin')->default(0); // poin pelanggaran

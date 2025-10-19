@@ -2,8 +2,10 @@
 
 namespace App\Filament\Resources\Pelanggarans\Schemas;
 
+use App\Models\Pasal;
 use Filament\Schemas\Schema;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 
 class PelanggaranForm
@@ -12,6 +14,18 @@ class PelanggaranForm
     {
         return $schema
             ->components([
+                Select::make('pasal_id')
+                    ->label('Pasal')
+                    ->options(
+                        fn() =>
+                        \App\Models\Pasal::all()
+                            ->mapWithKeys(fn($pasal) => [
+                                $pasal->id => "{$pasal->nama_pasal} - {$pasal->judul}"
+                            ])
+                    )
+                    ->searchable()
+                    ->required(),
+
                 TextInput::make('ayat')
                     ->numeric()
                     ->label('Ayat'),

@@ -10,12 +10,18 @@ class Pelanggaran extends Model
     use HasFactory;
 
     protected $fillable = [
+        'pasal_id',
         'ayat',
         'pelanggaran',
         'poin',
         'created_by',
         'updated_by',
     ];
+
+    public function pasal()
+    {
+        return $this->belongsTo(Pasal::class);
+    }
 
     // 🔗 Relasi ke User (pembuat & pengedit)
     public function creator()
