@@ -18,7 +18,13 @@ class KelasSiswaResource extends Resource
 {
     protected static ?string $model = KelasSiswa::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
+    protected static ?string $navigationLabel = 'Kelas Siswa';
+
+    protected static string|\UnitEnum|null $navigationGroup = 'Manajemen Data Siswa';
+
+    protected static ?int $navigationSort = 2;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingLibrary;
 
     protected static ?string $recordTitleAttribute = 'tingkat';
 

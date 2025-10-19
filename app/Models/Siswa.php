@@ -23,6 +23,9 @@ class Siswa extends Authenticatable
         'tingkat_12',
     ];
 
+    protected $hidden = ['password', 'remember_token'];
+
+
     public function kelasTingkat()
     {
         if ($this->tingkat_12) {
@@ -38,12 +41,19 @@ class Siswa extends Authenticatable
     }
 
 
-    protected $hidden = ['password', 'remember_token'];
 
     public function apresiasis()
     {
         return $this->belongsToMany(Apresiasi::class, 'apresiasi_siswa');
     }
+
+
+    public function laporanPelanggaran()
+    {
+        return $this->belongsToMany(LaporanPelanggaran::class, 'laporan_pelanggaran_siswa')
+            ->withTimestamps();
+    }
+
 
 
     public function kelasSiswa()
@@ -107,5 +117,22 @@ class Siswa extends Authenticatable
                 Storage::disk('public')->delete($siswa->foto_profile);
             }
         });
+    }
+
+    public function informasiLikes()
+    {
+        return $this->belongsToMany(\App\Models\Informasi::class, 'informasi_siswa_likes')
+            ->withTimestamps();
+    }
+
+    public function likedApresiasi()
+    {
+        return $this->belongsToMany(Apresiasi::class, 'apresiasi_siswa_likes')
+            ->withTimestamps();
+    }
+
+    public function likedLaporans()
+    {
+        return $this->belongsToMany(LaporanPelanggaran::class, 'laporan_siswa_likes')->withTimestamps();
     }
 }

@@ -42,7 +42,7 @@ return [
         ],
 
         'siswa' => [
-            'driver' => 'sanctum',
+            'driver' => 'session', // ⬅️ UBAH DARI sanctum KE session
             'provider' => 'siswas',
         ],
     ],
