@@ -14,11 +14,22 @@ class PelanggaransTable
     {
         return $table
             ->columns([
+                TextColumn::make('pasal.nama_pasal')
+                    ->label('Pasal')
+                    ->formatStateUsing(
+                        fn($state, $record) =>
+                        $record->pasal
+                            ? "{$record->pasal->nama_pasal} - {$record->pasal->judul}"
+                            : '-'
+                    )
+                    ->sortable()
+                    ->searchable(),
+
                 TextColumn::make('ayat')->sortable(),
                 TextColumn::make('pelanggaran')->searchable(),
                 TextColumn::make('poin')->sortable(),
                 TextColumn::make('creator.name')->label('Dibuat Oleh')->default('-'),
-                
+
             ])
             ->filters([
                 //

@@ -11,26 +11,23 @@ class AuthSiswaController extends Controller
 {
     public function login(Request $request)
     {
-        $request->validate([
-            'email' => 'required|email',
-            'password' => 'required',
-        ]);
-
         $siswa = Siswa::where('email', $request->email)->first();
 
-        if (!$siswa || !Hash::check($request->password, $siswa->password)) {
+        if (! $siswa || ! Hash::check($request->password, $siswa->password)) {
             return response()->json(['message' => 'Email atau password salah'], 401);
         }
 
-        $token = $siswa->createToken('auth_token')->plainTextToken;
+        // hapus token lama agar 1 siswa cuma punya 1 session aktif
+        $siswa->tokens()->delete();
+
+        $token = $siswa->createToken('token_siswa', ['*'], now()->addWeek())->plainTextToken;
 
         return response()->json([
-            'message' => 'Login berhasil',
             'access_token' => $token,
-            'token_type' => 'Bearer',
             'siswa' => $siswa,
         ]);
     }
+
 
     public function logout(Request $request)
     {

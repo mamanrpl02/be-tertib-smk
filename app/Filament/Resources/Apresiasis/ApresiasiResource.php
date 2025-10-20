@@ -27,7 +27,7 @@ class ApresiasiResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'nama';
 
-    public static function form(Schema $schema): Schema
+    public static function form(Schema $schema): Schema 
     {
         return ApresiasiForm::configure($schema);
     }
